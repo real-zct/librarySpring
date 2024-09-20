@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>书籍查询</title>
+    <link rel="stylesheet" type="text/css" href="/css/jquery.pagination.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <script type="text/javascript" src="/js/jquery.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/js/ckform.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script type="text/javascript" src="/js/jquery.pagination.min.js"></script>
+    <script>
+        $(function() {
+            var cp=parseInt($("#curPage").val());//当前页号，#curPage从当前html找对应id为curPage的值，显示在这里
+            var tp=parseInt($("#tolPage").val());//总页数，#tolPage从当前html找对应id为tolPage的值，显示在这里
+            $("#pagination2").pagination({
+                currentPage:cp,
+                totalPage:tp,
+                isShow: false,
+                count: 5,
+                prevPageText: "< 上一页",
+                nextPageText: "下一页 >",
+                callback: function(current) {//callback已经实现ui切换，并传入当前页号current，方法内需要定义数据显示的逻辑
+                    location.href='/book/list/'+current;//跳转到url对应'/book/list/'+current的后台方法，并将current值传入后台
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<form id="form" class="form-inline definewidth m20"
+      action="/book/search" method="post"><!--通过action指定的url跳转到后台对应的方法，并传入文本框中的信息到方法中，在方法中，用文本框对应的name设为传入参数-->
+    书籍关键字： <input type="text" name="keyWord" id="username"
+                 class="abc input-default" placeholder="书籍关键字">&nbsp;&nbsp;
+    <input type="hidden" value="1" name="current"/><!--传入当前页码-->
+    书籍类别:<select class="form-control" name="sid">
+    <option value="0">---请选择类别---</option><!--默认是0-->
+    <option th:each="sort:${sortList}" th:text="${sort.name}" th:value="${sort.id}"></option>
+    </select>&nbsp;&nbsp;
+    <button type="submit" class="btn btn-primary">查询</button>
+    &nbsp;&nbsp;
+    <input id="CurrentPage" type="hidden" name="currentPage" value="1" />
+</form>
+<table class="table table-bordered table-hover definewidth m10">
+    <thead>
+    <tr>
+        <th>书籍名称</th>
+        <th>书籍类别</th>
+        <th>作者</th>
+        <th>出版社</th>
+        <th>版本</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tr th:each="book:${page.data}"><!--book的意思是取出来的数据命名为book，page即取出request中attribute的名为page的数据-->
+        <td th:text="${book.name}"></td>
+        <td th:text="${book.sname}"></td>
+        <td th:text="${book.author}"></td>
+        <td th:text="${book.publish}"></td>
+        <td th:text="${book.edition}"></td>
+        <!--tr标签：定义表格中的一行，嵌套在<table></table>中
+        th标签：定义表格中的表头单元格，嵌套在<tr></tr>中
+        td标签：定义表格中的数据单元格，嵌套在<tr></tr>中-->
+        <td><a type="button" class="btn btn-success" th:href="'/borrow/add?bookId='+${book.id}">借阅</a>
+           <!-- 这里是一个按钮部件，在点击之后，会跳转到href指定的url中对应的后台方法中去，并且他是超链接，采用get请求传入-->
+        </td>
+        <!--迭代生成书籍信息-->
+    </tr>
+</table>
+<input th:value="${page.currentNo}" type="hidden" id="curPage"/><!--定义的原因是因为上面的分页逻辑对应的js片段，只能从页面上取数据，所以需要先将这两个数显示出来再赋给上面分页逻辑-->
+<input th:value="${page.totalNo}" type="hidden" id="tolPage"/>
+<center>
+    <div class="box">
+        <div id="pagination2" class="page fl"></div>
+    </div>
+</center>
+</body>
+
+</html>

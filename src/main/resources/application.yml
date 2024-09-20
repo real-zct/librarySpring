@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/library?useUnicode=true&characterEncoding=utf-8 #&servierTimezone=UTC
+    username: root
+    password: 123456
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+server:
+  port: 8181
+#用来定义mybatis-plus要扫描的mapper的xml文件的位置，用借助动态代理来动态创建mapper对象
+#classpath：表示在java路径中去找
+mybatis-plus:
+  mapper-locations: classpath:/com/southwind/mapper/xml/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#    在控制台输出sql语句

@@ -1,0 +1,53 @@
+package com.southwind.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.southwind.entity.Back;
+import com.southwind.entity.Book;
+import com.southwind.entity.Borrow;
+import com.southwind.entity.User;
+import com.southwind.mapper.BackMapper;
+import com.southwind.mapper.BookMapper;
+import com.southwind.mapper.BorrowMapper;
+import com.southwind.mapper.UserMapper;
+import com.southwind.service.BackService;
+import com.southwind.vo.BackVO;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class BackServiceImpl extends ServiceImpl<BackMapper, Back> implements BackService {
+    @Autowired
+    private BackMapper backMapper;
+    @Autowired
+    private BorrowMapper borrowMapper;
+    @Autowired
+    private BookMapper bookMapper;
+    @Autowired
+    private UserMapper userMapper;
+
+    @Override
+    public List<BackVO> backList() {
+        QueryWrapper<Back> backQueryWrapper = new QueryWrapper<>();
+        backQueryWrapper.eq("status",0);
+        List<Back> backs = this.backMapper.selectList(backQueryWrapper);
+        List<BackVO> backVOList=new ArrayList<>();
+        for(Back back:backs){
+            BackVO backVO=new BackVO();
+            Borrow borrow = this.borrowMapper.selectById(back.getBrid());
+            Book book = this.bookMapper.selectById(borrow.getBid());
+            BeanUtils.copyProperties(book,backVO);//赋值author、edition、publish
+            backVO.setBookName(book.getName());
+            User user = this.userMapper.selectById(borrow.getUid());
+            backVO.setUserName(user.getUsername());
+            BeanUtils.copyProperties(back,backVO);//赋值id和status
+            backVOList.add(backVO);
+
+        }
+        return backVOList;
+    }
+}
